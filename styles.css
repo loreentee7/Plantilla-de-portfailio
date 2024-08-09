@@ -1,0 +1,296 @@
+/* Reseteo básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    font-family: "Tahoma", sans-serif;
+    overflow: hidden;
+}
+
+/* Fondo de pantalla de Windows XP */
+.wallpaper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('images/xp-wallpaper.png') no-repeat center center;
+    background-size: cover;
+    z-index: -1;
+}
+
+/* Escritorio */
+.desktop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    width: 200px; /* Ancho suficiente para los íconos */
+}
+
+.icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    width: 80px; /* Ajusta según el tamaño de tus íconos */
+    height: 80px; /* Ajusta según el tamaño de tus íconos */
+    z-index: 1;
+}
+
+/* Disposición vertical */
+.icon:nth-child(1) {
+    top: 50px;
+    left: 50px;
+}
+
+.icon:nth-child(2) {
+    top: 150px;
+    left: 50px;
+}
+
+.icon:nth-child(3) {
+    top: 250px;
+    left: 50px;
+}
+
+.icon.dragging {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+/* Estilo de los íconos */
+.icon img {
+    width: 48px;
+    height: 48px;
+    transition: transform 0.2s ease;
+}
+
+.icon p {
+    margin-top: 5px;
+    color: white;
+    font-size: 14px;
+}
+
+/* Ventanas */
+.window {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 400px;
+    background-color: #C0C0C0;
+    border: 2px solid #000;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    display: none;
+    cursor: default;
+    border-radius: 8px; /* Bordes redondeados */
+    overflow: hidden;
+    transform: scale(0.95); /* Escala inicial para animación */
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Transiciones suaves */
+}
+
+/* Cabecera de la ventana */
+.window-header {
+    background-color: #000080;
+    color: white;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    border-bottom: 2px solid #000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.window-header span {
+    font-weight: bold;
+}
+
+.window-header .close-button {
+    background-color: #FF0000;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px; /* Bordes redondeados para el botón */
+    transition: background-color 0.2s ease;
+}
+
+.window-header .close-button:hover {
+    background-color: #cc0000; /* Color al pasar el ratón */
+}
+
+.window-content {
+    padding: 20px;
+    background-color: white;
+}
+
+/* Animación de entrada de las ventanas */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.window {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Barra de tareas */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #C0C0C0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    border-top: 2px solid #000;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.start-button {
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: transform 0.2s ease; /* Animación al pasar el ratón */
+}
+
+.start-button img {
+    width: 75px;
+    margin-right: 5px;
+    transition: transform 0.2s ease; /* Animación al pasar el ratón */
+}
+
+.start-button:hover {
+    transform: scale(1.1); /* Escala al pasar el ratón */
+}
+
+.taskbar-apps {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+}
+
+.taskbar-clock {
+    padding-right: 20px;
+    font-size: 14px;
+}
+
+/* Menú de Inicio */
+.start-menu {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    width: 200px;
+    background-color: #C0C0C0;
+    border: 2px solid #000;
+    z-index: 100;
+    display: none; /* Inicialmente oculto */
+    opacity: 0; /* Inicialmente transparente */
+    transform: translateY(10px); /* Inicialmente desplazado hacia abajo */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Transiciones suaves */
+}
+
+.start-menu.show {
+    display: block; /* Muestra el menú */
+    opacity: 1; /* Hacemos el menú visible */
+    transform: translateY(0); /* Regresa a la posición original */
+}
+
+.start-menu ul {
+    list-style: none;
+    padding: 10px;
+}
+
+.start-menu li {
+    padding: 5px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transiciones suaves */
+}
+
+.start-menu li:hover {
+    background-color: #000080;
+    color: white;
+}
+
+/* Animaciones para el carrusel */
+.carousel-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+    min-width: 100%;
+    box-sizing: border-box;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-prev,
+.carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px; /* Bordes redondeados */
+    transition: background-color 0.3s ease;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+    background-color: rgba(0, 0, 0, 0.8); /* Color al pasar el ratón */
+}
+
+.carousel-prev {
+    left: 10px;
+}
+
+.carousel-next {
+    right: 10px;
+}
+
+/* Animación de aparición para íconos y ventanas */
+@keyframes slideIn {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.icon,
+.window {
+    animation: slideIn 0.5s ease-out;
+}
