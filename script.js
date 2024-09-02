@@ -1,9 +1,31 @@
-// Función para abrir una ventana
 function openWindow(id) {
+    // Cerrar todas las ventanas abiertas
+    closeAllWindows();
+
+    // Abrir la nueva ventana
     const windowElement = document.getElementById(id);
     windowElement.style.display = 'block';
     windowElement.classList.remove('hidden');
+
+    // Centrar la ventana en la pantalla
+    centerWindow(windowElement);
+
+    // Hacer que la ventana sea arrastrable
     makeWindowDraggable(windowElement);
+}
+
+// Función para centrar una ventana en la pantalla
+function centerWindow(windowElement) {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const windowWidth = windowElement.offsetWidth;
+    const windowHeight = windowElement.offsetHeight;
+
+    const left = (viewportWidth - windowWidth) / 2;
+    const top = (viewportHeight - windowHeight) / 2;
+
+    windowElement.style.left = `${left}px`;
+    windowElement.style.top = `${top}px`;
 }
 
 // Función para cerrar una ventana
@@ -74,43 +96,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function makeIconsDraggable() {
     const icons = document.querySelectorAll('.icon');
+    const taskbar = document.querySelector('.taskbar');
+    const taskbarTop = taskbar.offsetTop; // Posición superior de la barra de tareas
 
     icons.forEach(icon => {
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
+        let initialX, initialY;
 
         icon.onmousedown = function(e) {
             e.preventDefault();
-            isDragging = true;
+            isDragging = false; // Inicialmente no se está arrastrando
+            initialX = e.clientX;
+            initialY = e.clientY;
 
-            // Calcula el desplazamiento del ícono respecto al cursor
             offsetX = e.clientX - icon.getBoundingClientRect().left;
             offsetY = e.clientY - icon.getBoundingClientRect().top;
 
             document.onmousemove = function(e) {
-                // Mueve el ícono con el cursor
-                icon.style.left = (e.clientX - offsetX) + 'px';
-                icon.style.top = (e.clientY - offsetY) + 'px';
+                const deltaX = e.clientX - initialX;
+                const deltaY = e.clientY - initialY;
+
+                // Consideramos que es un arrastre si el movimiento es significativo
+                if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                    isDragging = true;
+                    let newX = e.clientX - offsetX;
+                    let newY = e.clientY - offsetY;
+
+                    // Restricción para no mover el icono por debajo de la barra de tareas
+                    if (newY + icon.offsetHeight > taskbarTop) {
+                        newY = taskbarTop - icon.offsetHeight;
+                    }
+
+                    icon.style.left = `${newX}px`;
+                    icon.style.top = `${newY}px`;
+                }
             };
 
             document.onmouseup = function() {
                 document.onmousemove = null;
                 document.onmouseup = null;
-
-                if (isDragging) {
-                    isDragging = false; // Solo se desactiva el arrastre, no se abre la ventana
-                }
             };
         };
 
         icon.onclick = function() {
-            if (!isDragging) { // Solo abre la ventana si no se está arrastrando
+            if (!isDragging) {
+                // Solo abre la ventana si no se arrastró el icono
                 const windowId = icon.getAttribute('onclick').split("'")[1];
                 openWindow(windowId);
             }
         };
     });
 }
+
+// Inicializar funciones al cargar el documento
+document.addEventListener('DOMContentLoaded', () => {
+    makeIconsDraggable();
+    setInterval(updateClock, 1000);
+    updateClock();
+});
+
+
+
 
 
 // Función para mover el carrusel
