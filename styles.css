@@ -278,6 +278,22 @@ body, html {
     right: 10px;
 }
 
+.trash {
+    position: absolute;
+    bottom: 20px; /* Espacio desde el borde inferior */
+    right: 20px; /* Espacio desde el borde derecho */
+    width: 50px; /* Ajusta el tamaño según sea necesario */
+    height: 50px; /* Ajusta el tamaño según sea necesario */
+    cursor: pointer; /* Cambia el cursor al pasar sobre la papelera */
+    text-align: center; /* Centrar el texto debajo de la imagen */
+}
+
+.trash img {
+    max-width: 100%; /* Hacer que la imagen se ajuste al contenedor */
+    max-height: 100%; /* Hacer que la imagen se ajuste al contenedor */
+}
+
+
 /* Animación de aparición para íconos y ventanas */
 @keyframes slideIn {
     from {

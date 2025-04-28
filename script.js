@@ -90,6 +90,14 @@ function makeWindowDraggable(windowElement) {
     };
 }
 
+function makeWindowDeletable(windowElement) {
+    windowElement.setAttribute('draggable', true);
+
+    windowElement.addEventListener('dragstart', function (event) {
+        event.dataTransfer.setData('text/plain', windowElement.id);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     makeIconsDraggable();
 });
@@ -180,9 +188,34 @@ function moveCarousel(direction) {
     carousel.style.transform = `translateX(${offset}%)`;
 }
 
+function initializeTrashBin() {
+    const trashBin = document.getElementById('trash-bin');
+
+    // Al soltar sobre la papelera, eliminar la ventana arrastrada
+    trashBin.addEventListener('dragover', function (event) {
+        event.preventDefault(); // Permitir el "drop" sobre la papelera
+    });
+
+    trashBin.addEventListener('drop', function (event) {
+        event.preventDefault();
+        const windowId = event.dataTransfer.getData('text');
+        const windowElement = document.getElementById(windowId);
+        if (windowElement) {
+            windowElement.remove(); // Eliminar la ventana del DOM
+            alert(`${windowId} eliminado correctamente.`);
+        }
+    });
+}
+
 // Inicializar funciones
 document.addEventListener('DOMContentLoaded', () => {
     makeIconsDraggable();
     setInterval(updateClock, 1000);
     updateClock();
+});
+
+window.addEventListener('load', function () {
+    const windows = document.querySelectorAll('.window'); // Asegúrate de que todas las ventanas tengan esta clase
+    windows.forEach(makeWindowDeletable);
+    initializeTrashBin();
 });
