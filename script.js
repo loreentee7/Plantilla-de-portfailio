@@ -1,95 +1,3 @@
-function openWindow(id) {
-    // Cerrar todas las ventanas abiertas
-    closeAllWindows();
-
-    // Abrir la nueva ventana
-    const windowElement = document.getElementById(id);
-    windowElement.style.display = 'block';
-    windowElement.classList.remove('hidden');
-
-    // Centrar la ventana en la pantalla
-    centerWindow(windowElement);
-
-    // Hacer que la ventana sea arrastrable
-    makeWindowDraggable(windowElement);
-}
-
-// Función para centrar una ventana en la pantalla
-function centerWindow(windowElement) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const windowWidth = windowElement.offsetWidth;
-    const windowHeight = windowElement.offsetHeight;
-
-    const left = (viewportWidth - windowWidth) / 2;
-    const top = (viewportHeight - windowHeight) / 2;
-
-    windowElement.style.left = `${left}px`;
-    windowElement.style.top = `${top}px`;
-}
-
-// Función para cerrar una ventana
-function closeWindow(id) {
-    const windowElement = document.getElementById(id);
-    windowElement.style.display = 'none';
-}
-
-// Función para cerrar todas las ventanas
-function closeAllWindows() {
-    const windows = document.querySelectorAll('.window');
-    windows.forEach(window => {
-        window.style.display = 'none';
-    });
-}
-
-// Función para mostrar/ocultar el menú de inicio
-function toggleStartMenu() {
-    const startMenu = document.getElementById('start-menu');
-    if (startMenu.classList.contains('show')) {
-        startMenu.classList.remove('show');
-        setTimeout(() => startMenu.style.display = 'none', 300); // Espera a que la animación termine
-    } else {
-        startMenu.style.display = 'block';
-        setTimeout(() => startMenu.classList.add('show'), 10); // Añade la clase después de que se muestre
-    }
-}
-
-// Actualización del reloj en la barra de tareas
-function updateClock() {
-    const clockElement = document.getElementById('clock');
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    clockElement.textContent = `${hours}:${minutes}`;
-}
-
-// Hacer que las ventanas sean arrastrables
-function makeWindowDraggable(windowElement) {
-    const header = windowElement.querySelector('.window-header');
-    let offsetX = 0, offsetY = 0, initialX, initialY;
-
-    header.onmousedown = function (e) {
-        e.preventDefault();
-        initialX = e.clientX;
-        initialY = e.clientY;
-
-        document.onmousemove = function (e) {
-            offsetX = initialX - e.clientX;
-            offsetY = initialY - e.clientY;
-            initialX = e.clientX;
-            initialY = e.clientY;
-
-            windowElement.style.top = (windowElement.offsetTop - offsetY) + "px";
-            windowElement.style.left = (windowElement.offsetLeft - offsetX) + "px";
-        };
-
-        document.onmouseup = function () {
-            document.onmousemove = null;
-            document.onmouseup = null;
-        };
-    };
-}
-
 function initializeTrashBinForIcons() {
     const trashBin = document.getElementById('trash-bin');
 
@@ -115,13 +23,7 @@ function initializeTrashBinForIcons() {
                 iconRect.top >= trashRect.top &&
                 iconRect.bottom <= trashRect.bottom
             ) {
-                const confirmDelete = confirm(`¿Estás seguro de que deseas eliminar "${iconId}"?`);
-                if (confirmDelete) {
-                    iconElement.remove(); // Eliminar el ícono del DOM
-                    alert(`${iconId} eliminado correctamente.`);
-                }
-            } else {
-                alert('El ícono debe estar completamente dentro de la papelera para eliminarlo.');
+                showDeleteModal(iconElement);
             }
         }
     });
@@ -215,7 +117,113 @@ function makeIconsDraggable() {
                 openWindow(windowId);
             }
         };
+
+        // Añadir menú contextual (click derecho)
+        icon.addEventListener('contextmenu', function (event) {
+            event.preventDefault();
+            showContextMenu(event, icon);
+        });
     });
+}
+
+function showContextMenu(event, icon) {
+    // Crear el menú contextual
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'context-menu';
+    contextMenu.style.top = `${event.clientY}px`;
+    contextMenu.style.left = `${event.clientX}px`;
+
+    // Opciones del menú
+    const renameOption = document.createElement('div');
+    renameOption.className = 'context-menu-item';
+    renameOption.textContent = 'Cambiar nombre';
+    renameOption.onclick = function () {
+        showRenameModal(icon);
+        document.body.removeChild(contextMenu);
+    };
+
+    const deleteOption = document.createElement('div');
+    deleteOption.className = 'context-menu-item';
+    deleteOption.textContent = 'Eliminar';
+    deleteOption.onclick = function () {
+        showDeleteModal(icon);
+        document.body.removeChild(contextMenu);
+    };
+
+    // Añadir opciones al menú
+    contextMenu.appendChild(renameOption);
+    contextMenu.appendChild(deleteOption);
+
+    // Añadir el menú al documento
+    document.body.appendChild(contextMenu);
+
+    // Eliminar el menú al hacer clic fuera de él
+    document.addEventListener('click', function removeMenu() {
+        if (document.body.contains(contextMenu)) {
+            document.body.removeChild(contextMenu);
+        }
+        document.removeEventListener('click', removeMenu);
+    });
+}
+
+function showRenameModal(icon) {
+    const modal = document.createElement('div');
+    modal.className = 'xp-modal';
+
+    modal.innerHTML = `
+        <div class="xp-modal-header">
+            <span>Cambiar nombre</span>
+            <button class="close-button">X</button>
+        </div>
+        <div class="xp-modal-body">
+            <p>Introduce el nuevo nombre:</p>
+            <input type="text" class="xp-modal-input" value="${icon.querySelector('p').textContent}">
+        </div>
+        <div class="xp-modal-footer">
+            <button class="xp-modal-btn cancel-btn">Cancelar</button>
+            <button class="xp-modal-btn confirm-btn">Aceptar</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('.close-button').onclick = () => modal.remove();
+    modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    modal.querySelector('.confirm-btn').onclick = () => {
+        const newName = modal.querySelector('.xp-modal-input').value;
+        if (newName) {
+            icon.querySelector('p').textContent = newName;
+        }
+        modal.remove();
+    };
+}
+
+function showDeleteModal(icon) {
+    const modal = document.createElement('div');
+    modal.className = 'xp-modal';
+
+    modal.innerHTML = `
+        <div class="xp-modal-header">
+            <span>Eliminar ícono</span>
+            <button class="close-button">X</button>
+        </div>
+        <div class="xp-modal-body">
+            <p>¿Estás seguro de que deseas eliminar este ícono?</p>
+        </div>
+        <div class="xp-modal-footer">
+            <button class="xp-modal-btn cancel-btn">Cancelar</button>
+            <button class="xp-modal-btn confirm-btn">Eliminar</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('.close-button').onclick = () => modal.remove();
+    modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    modal.querySelector('.confirm-btn').onclick = () => {
+        icon.remove();
+        modal.remove();
+    };
 }
 
 // Inicializar funciones al cargar el documento

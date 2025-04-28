@@ -197,6 +197,127 @@ body, html {
     font-size: 14px;
 }
 
+.xp-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background-color: #C0C0C0;
+    border: 2px solid #000;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    font-family: "Tahoma", sans-serif;
+}
+
+.xp-modal-header {
+    background-color: #000080;
+    color: white;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #000;
+}
+
+.xp-modal-header span {
+    font-weight: bold;
+}
+
+.xp-modal-header .close-button {
+    background-color: #FF0000;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.xp-modal-header .close-button:hover {
+    background-color: #cc0000;
+}
+
+.xp-modal-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.xp-modal-body p {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.xp-modal-input {
+    width: 90%;
+    padding: 5px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.xp-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-top: 2px solid #000;
+    background-color: #E0E0E0;
+}
+
+.xp-modal-btn {
+    padding: 5px 10px;
+    border: 1px solid #000;
+    background-color: #C0C0C0;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.xp-modal-btn:hover {
+    background-color: #A0A0A0;
+}
+
+.xp-modal-btn.confirm-btn {
+    background-color: #008000;
+    color: white;
+}
+
+.xp-modal-btn.confirm-btn:hover {
+    background-color: #006400;
+}
+
+.xp-modal-btn.cancel-btn {
+    background-color: #FF0000;
+    color: white;
+}
+
+.xp-modal-btn.cancel-btn:hover {
+    background-color: #CC0000;
+}
+
+.context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: 150px;
+    font-family: Arial, sans-serif;
+}
+
+.context-menu-item {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.context-menu-item:hover {
+    background-color: #f0f0f0;
+}
+
 /* Menú de Inicio */
 .start-menu {
     position: fixed;
