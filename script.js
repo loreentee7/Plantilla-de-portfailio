@@ -68,12 +68,12 @@ function makeWindowDraggable(windowElement) {
     const header = windowElement.querySelector('.window-header');
     let offsetX = 0, offsetY = 0, initialX, initialY;
 
-    header.onmousedown = function(e) {
+    header.onmousedown = function (e) {
         e.preventDefault();
         initialX = e.clientX;
         initialY = e.clientY;
 
-        document.onmousemove = function(e) {
+        document.onmousemove = function (e) {
             offsetX = initialX - e.clientX;
             offsetY = initialY - e.clientY;
             initialX = e.clientX;
@@ -83,45 +83,78 @@ function makeWindowDraggable(windowElement) {
             windowElement.style.left = (windowElement.offsetLeft - offsetX) + "px";
         };
 
-        document.onmouseup = function() {
+        document.onmouseup = function () {
             document.onmousemove = null;
             document.onmouseup = null;
         };
     };
 }
 
-function makeWindowDeletable(windowElement) {
-    windowElement.setAttribute('draggable', true);
+function initializeTrashBinForIcons() {
+    const trashBin = document.getElementById('trash-bin');
 
-    windowElement.addEventListener('dragstart', function (event) {
-        event.dataTransfer.setData('text/plain', windowElement.id);
+    // Permitir el "drop" sobre la papelera
+    trashBin.addEventListener('dragover', function (event) {
+        event.preventDefault();
+    });
+
+    // Manejar el evento "drop" para eliminar íconos
+    trashBin.addEventListener('drop', function (event) {
+        event.preventDefault();
+        const iconId = event.dataTransfer.getData('text');
+        const iconElement = document.getElementById(iconId);
+
+        if (iconElement) {
+            const trashRect = trashBin.getBoundingClientRect();
+            const iconRect = iconElement.getBoundingClientRect();
+
+            // Verificar si el ícono está completamente dentro de la papelera
+            if (
+                iconRect.left >= trashRect.left &&
+                iconRect.right <= trashRect.right &&
+                iconRect.top >= trashRect.top &&
+                iconRect.bottom <= trashRect.bottom
+            ) {
+                const confirmDelete = confirm(`¿Estás seguro de que deseas eliminar "${iconId}"?`);
+                if (confirmDelete) {
+                    iconElement.remove(); // Eliminar el ícono del DOM
+                    alert(`${iconId} eliminado correctamente.`);
+                }
+            } else {
+                alert('El ícono debe estar completamente dentro de la papelera para eliminarlo.');
+            }
+        }
     });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    makeIconsDraggable();
-});
 
 function makeIconsDraggable() {
     const icons = document.querySelectorAll('.icon');
     const taskbar = document.querySelector('.taskbar');
     const taskbarTop = taskbar.offsetTop; // Posición superior de la barra de tareas
+    const gridSize = 100; // Tamaño de la cuadrícula (ajústalo según tus necesidades)
 
     icons.forEach(icon => {
+        icon.setAttribute('draggable', true);
+
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
         let initialX, initialY;
+        let originalX, originalY;
 
-        icon.onmousedown = function(e) {
+        icon.onmousedown = function (e) {
             e.preventDefault();
             isDragging = false; // Inicialmente no se está arrastrando
             initialX = e.clientX;
             initialY = e.clientY;
 
+            // Guardar la posición original
+            originalX = icon.offsetLeft;
+            originalY = icon.offsetTop;
+
             offsetX = e.clientX - icon.getBoundingClientRect().left;
             offsetY = e.clientY - icon.getBoundingClientRect().top;
 
-            document.onmousemove = function(e) {
+            document.onmousemove = function (e) {
                 const deltaX = e.clientX - initialX;
                 const deltaY = e.clientY - initialY;
 
@@ -136,18 +169,46 @@ function makeIconsDraggable() {
                         newY = taskbarTop - icon.offsetHeight;
                     }
 
+                    // Actualizar la posición del ícono
                     icon.style.left = `${newX}px`;
                     icon.style.top = `${newY}px`;
                 }
             };
 
-            document.onmouseup = function() {
+            document.onmouseup = function () {
+                if (isDragging) {
+                    // Ajustar la posición del ícono a la cuadrícula
+                    const finalX = Math.round(icon.offsetLeft / gridSize) * gridSize;
+                    const finalY = Math.round(icon.offsetTop / gridSize) * gridSize;
+
+                    // Verificar si la posición está ocupada
+                    const isOccupied = Array.from(icons).some(otherIcon => {
+                        if (otherIcon === icon) return false; // Ignorar el ícono actual
+                        const otherLeft = parseInt(otherIcon.style.left, 10);
+                        const otherTop = parseInt(otherIcon.style.top, 10);
+                        return otherLeft === finalX && otherTop === finalY;
+                    });
+
+                    if (!isOccupied) {
+                        icon.style.left = `${finalX}px`;
+                        icon.style.top = `${finalY}px`;
+                    } else {
+                        // Volver a la posición original si está ocupada
+                        icon.style.left = `${originalX}px`;
+                        icon.style.top = `${originalY}px`;
+                    }
+                }
+
                 document.onmousemove = null;
                 document.onmouseup = null;
             };
         };
 
-        icon.onclick = function() {
+        icon.addEventListener('dragstart', function (event) {
+            event.dataTransfer.setData('text', icon.id); // Guardar el ID del ícono
+        });
+
+        icon.onclick = function () {
             if (!isDragging) {
                 // Solo abre la ventana si no se arrastró el icono
                 const windowId = icon.getAttribute('onclick').split("'")[1];
@@ -160,62 +221,7 @@ function makeIconsDraggable() {
 // Inicializar funciones al cargar el documento
 document.addEventListener('DOMContentLoaded', () => {
     makeIconsDraggable();
+    initializeTrashBinForIcons();
     setInterval(updateClock, 1000);
     updateClock();
-});
-
-
-
-
-
-// Función para mover el carrusel
-let currentIndex = 0;
-
-function moveCarousel(direction) {
-    const carousel = document.querySelector('#projects-window .carousel');
-    const items = document.querySelectorAll('#projects-window .carousel-item');
-    const totalItems = items.length;
-
-    currentIndex += direction;
-
-    if (currentIndex < 0) {
-        currentIndex = totalItems - 1;
-    } else if (currentIndex >= totalItems) {
-        currentIndex = 0;
-    }
-
-    const offset = -currentIndex * 100;
-    carousel.style.transform = `translateX(${offset}%)`;
-}
-
-function initializeTrashBin() {
-    const trashBin = document.getElementById('trash-bin');
-
-    // Al soltar sobre la papelera, eliminar la ventana arrastrada
-    trashBin.addEventListener('dragover', function (event) {
-        event.preventDefault(); // Permitir el "drop" sobre la papelera
-    });
-
-    trashBin.addEventListener('drop', function (event) {
-        event.preventDefault();
-        const windowId = event.dataTransfer.getData('text');
-        const windowElement = document.getElementById(windowId);
-        if (windowElement) {
-            windowElement.remove(); // Eliminar la ventana del DOM
-            alert(`${windowId} eliminado correctamente.`);
-        }
-    });
-}
-
-// Inicializar funciones
-document.addEventListener('DOMContentLoaded', () => {
-    makeIconsDraggable();
-    setInterval(updateClock, 1000);
-    updateClock();
-});
-
-window.addEventListener('load', function () {
-    const windows = document.querySelectorAll('.window'); // Asegúrate de que todas las ventanas tengan esta clase
-    windows.forEach(makeWindowDeletable);
-    initializeTrashBin();
 });

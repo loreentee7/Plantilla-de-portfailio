@@ -278,15 +278,31 @@ body, html {
     right: 10px;
 }
 
+.icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    width: 80px; /* Ajusta según el tamaño de tus íconos */
+    height: 80px; /* Ajusta según el tamaño de tus íconos */
+    z-index: 1;
+    user-select: none; /* Evitar selección de texto al arrastrar */
+}
+
 .trash {
     position: absolute;
-    bottom: 20px; /* Espacio desde el borde inferior */
-    right: 20px; /* Espacio desde el borde derecho */
-    width: 50px; /* Ajusta el tamaño según sea necesario */
-    height: 50px; /* Ajusta el tamaño según sea necesario */
-    cursor: pointer; /* Cambia el cursor al pasar sobre la papelera */
-    text-align: center; /* Centrar el texto debajo de la imagen */
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
 }
+
 
 .trash img {
     max-width: 100%; /* Hacer que la imagen se ajuste al contenedor */
